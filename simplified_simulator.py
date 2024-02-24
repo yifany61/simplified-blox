@@ -1,4 +1,3 @@
-
 import time
 import random
 from fifo_scheduler import FIFOScheduler 
@@ -23,7 +22,7 @@ class SimplifiedSimulator:
                     'duration': random.randint(100, 300)  # Random job duration between 100 and 300 seconds
                 }
                 self.scheduler.add_job(self.job_id, job_info)
-                print(f'Job {self.job_id} submitted.')
+                print(f'Job {self.job_id} submitted (simulator).')
                 job_generated = True
 
             # Schedule jobs in FIFO order
