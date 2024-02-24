@@ -5,27 +5,27 @@ class FIFOScheduler:
     def __init__(self):
         # Queue to hold jobs in FIFO order
         self.job_queue = queue.Queue()
-        # Dictionary to hold job start times
-        self.job_start_times = {}
+        # Dictionary to hold job start and end times
+        self.job_times = {}
 
     def add_job(self, job_id, job_info):
         '''Adds a new job to the scheduler queue.'''
         self.job_queue.put((job_id, job_info))
+        print(f'Job {job_id} submitted.')
 
     def schedule_jobs(self):
-        '''Schedules jobs in FIFO order and records start times.'''
-        current_time = time.time()
-        while not self.job_queue.empty():
+        '''Schedules jobs in FIFO order and records start and end times.'''
+        # If there are no jobs being processed and there is at least one job waiting, schedule it
+        if not self.job_times and not self.job_queue.empty():
             job_id, job_info = self.job_queue.get()
-            # For simplicity, assume each job starts as soon as it's scheduled
-            self.job_start_times[job_id] = current_time
-            # Simulate job execution by waiting a bit
-            time.sleep(0.1)  # This represents the job execution time
-            print(f'Job {job_id} started at {self.job_start_times[job_id]}')
-
-    def get_job_start_time(self, job_id):
-        '''Retrieves the start time of a job.'''
-        return self.job_start_times.get(job_id, None)
+            current_time = time.time()
+            # Start the next job at the end time of the last job or now if no jobs have been scheduled
+            start_time = self.job_times.get(job_id - 1, {}).get('end_time', current_time)
+            end_time = start_time + job_info['duration']
+            self.job_times[job_id] = {'start_time': start_time, 'end_time': end_time}
+            print(f'Job {job_id} started at {start_time} and will end at {end_time}')
+            # Simulate job execution by waiting for the job duration
+            time.sleep(job_info['duration'])
 
 # Example usage
 if __name__ == '__main__':
@@ -33,6 +33,6 @@ if __name__ == '__main__':
     # Simulate adding jobs to the scheduler
     scheduler.add_job(1, {'job_name': 'Job1', 'duration': 5})
     scheduler.add_job(2, {'job_name': 'Job2', 'duration': 3})
-    # Schedule jobs and print their start times
-    scheduler.schedule_jobs()
-
+    # Schedule jobs and print their start and end times
+    while not scheduler.job_queue.empty():
+        scheduler.schedule_jobs()
