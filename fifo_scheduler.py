@@ -43,6 +43,13 @@ class FIFOScheduler:
                 self.cluster_state.free_resources(job_info['resources'], allocated_machine)
             else:
                 print(f'Job {job_id} could not be scheduled due to insufficient resources.')
+    
+    def check_completed_jobs(self):
+        current_time = time.time()
+        for job_id, job_info in list(self.job_times.items()):
+            if current_time >= job_info['end_time']:
+                yield job_id, job_info
+                del self.job_times[job_id] 
 
 if __name__ == '__main__':
     cluster_state = ClusterState()
@@ -53,4 +60,4 @@ if __name__ == '__main__':
     start_time = time.time()
     while time.time() - start_time < 15:  # Simulate for 15 seconds
         scheduler.schedule_jobs()
-        time.sleep(0.1)  # Small delay to prevent tight loop from consuming too much CPU
+        time.sleep(0.1) 
