@@ -25,19 +25,20 @@ class FIFOScheduler:
         self.last_job_end_time = 0
 
     def add_job(self, job_id, job_info):
-        self.job_queue.put((job_id, job_info))
-        print(f'Job {job_id} submitted with resources {job_info["resources"]}')
+        submit_time = time.time()
+        self.job_queue.put((job_id, job_info, submit_time))
+        print(f'Job {job_id} submitted with resources {job_info["resources"]} at {submit_time}')
 
     def schedule_jobs(self):
         current_time = time.time()
         if current_time >= self.last_job_end_time and not self.job_queue.empty():
-            job_id, job_info = self.job_queue.get()
+            job_id, job_info, submit_time = self.job_queue.get()
             allocated_machine = self.cluster_state.allocate_resources(job_info['resources'])
             if allocated_machine:
                 start_time = max(self.last_job_end_time, current_time)
                 end_time = start_time + job_info['duration']
                 self.last_job_end_time = end_time
-                self.job_times[job_id] = {'start_time': start_time, 'end_time': end_time, 'machine': allocated_machine}
+                self.job_times[job_id] = {'submit_time': submit_time, 'start_time': start_time, 'end_time': end_time, 'machine': allocated_machine}
                 print(f'Job {job_id} started at {start_time} and will end at {end_time}')
                 # Simulating job completion and resource deallocation
                 self.cluster_state.free_resources(job_info['resources'], allocated_machine)

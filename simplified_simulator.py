@@ -7,9 +7,9 @@ class SimplifiedSimulator:
         self.jobs_per_hour = jobs_per_hour
         self.scheduler = FIFOScheduler(cluster_state)
         self.job_id = 0
-        self.job_completion_times = []  # Store completion times for each job
+        self.job_completion_times = []  
 
-    def run_simulation(self, simulation_time=3600):  # Run for one hour by default
+    def run_simulation(self, simulation_time=3600):  
         print(f'Simulation started, running for {simulation_time} seconds...')
         end_time = time.time() + simulation_time
         while time.time() < end_time:
@@ -22,15 +22,11 @@ class SimplifiedSimulator:
                     'resources': {'cpus': 2, 'gpus': 1, 'memory': 4}
                 }
                 print(f'Job {self.job_id} generated with duration {job_duration}s.')
-                # job_start_time = time.time()
                 self.scheduler.add_job(self.job_id, job_info)
             self.scheduler.schedule_jobs()
-                # job_end_time = time.time()
-                # job_completion_time = job_end_time - job_start_time
-                # self.job_completion_times.append(job_completion_time)
-                # print(f'Job {self.job_id} completed. Completion time: {job_completion_time}s.')
             for completed_job_id, completed_job_info in self.scheduler.check_completed_jobs():
-                completion_time = completed_job_info['end_time'] - completed_job_info['start_time']
+                submission_time = completed_job_info['submit_time']
+                completion_time = completed_job_info['end_time'] - submission_time
                 self.job_completion_times.append(completion_time)
                 print(f'Job {completed_job_id} completed. Completion time: {completion_time}s.')
             time.sleep(1)
